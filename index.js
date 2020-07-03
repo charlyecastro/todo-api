@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 
 // Connect to spreadsheet
-spreadsheet.connect()
+    spreadsheet.connect()
 
 // Base route sends Hello World
 app.get('/', function (req, res) {
