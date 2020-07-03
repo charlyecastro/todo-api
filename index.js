@@ -38,23 +38,29 @@ app.get('/all', async function (req, res) {
 
 // Adds new kay value pair
 app.post('/data', async function (req, res) {
-    try {
-        let key = Object.keys(req.body)[0]
-        let val = req.body[key]
-        let index = await containsKey(key)
-        if (index !== -1) {
-            await spreadsheet.edit(index, key, val)
-            console.log("edited existing key value pair")
-        } else {
-            await spreadsheet.add(key, val);
-            console.log("added new key value pair")
+    if (req.get('Content-Type') == 'application/json') {
+        try {
+            let key = Object.keys(req.body)[0]
+            let val = req.body[key]
+            let index = await containsKey(key)
+            if (index !== -1) {
+                await spreadsheet.edit(index, key, val)
+                console.log("edited existing key value pair")
+            } else {
+                await spreadsheet.add(key, val);
+                console.log("added new key value pair")
+            }
+            res.status(200);
+            res.send("OK")
+        } catch (err) {
+            console.log(err)
+            res.status(500);
+            res.send("Something went wrong")
         }
-        res.status(200);
-        res.send("OK")
-    } catch (err) {
-        console.log(err)
-        res.status(500);
-        res.send("Something went wrong")
+    } else {
+        console.log("Didn't set content type")
+        res.status(415);
+        res.send("Unsupported Media Type. Remember to set headers appropriately");
     }
 })
 
