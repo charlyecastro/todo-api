@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 // Imports
 const express = require('express');
@@ -16,8 +16,9 @@ app.use(morgan("dev"));
 // Connect to spreadsheet
 spreadsheet.connect()
 
-//
+// Base route sends Hello World
 app.get('/', function (req, res) {
+    res.status(200);
     res.send('hello world')
 })
 

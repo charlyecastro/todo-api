@@ -5,7 +5,11 @@ let doc;
 // Connect to spreadsheet
 async function connect() {
     doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID);
-    await doc.useServiceAccountAuth(require('../client-secret.json'));
+
+    await doc.useServiceAccountAuth({
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY ,
+      });
     console.log("connected to spreadsheet!")
 }
 
