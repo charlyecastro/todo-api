@@ -14,7 +14,8 @@ async function fetch() {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
     const rows = await sheet.getRows();
-    console.log(rows);
+    // console.log(rows);
+    return rows
 }
 
 // deletes a row
