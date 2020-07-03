@@ -14,8 +14,12 @@ async function fetch() {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
     const rows = await sheet.getRows();
-    // console.log(rows);
-    return rows
+    const result = rows.map(element =>  {
+        let obj = {}
+        obj[element.Task] = element.Done
+        return obj
+    });
+    return result
 }
 
 // deletes a row
@@ -28,7 +32,8 @@ async function remove(id) {
 }
 
 // add a new row
-async function add(todo) {
+async function add(todoName, isDone) {
+    let todo = {"Task" : todoName, "Done" : isDone}
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
     let info = await sheet.addRow(todo);
@@ -36,12 +41,12 @@ async function add(todo) {
 }
 
 // edit existing row
-async function edit(id, todo) {
+async function edit(id, todoName, isDone) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
     const rows = await sheet.getRows();
-    rows[id].Task =  todo.Task
-    rows[id].Done =  todo.Done
+    rows[id].Task =  todoName
+    rows[id].Done =  isDone
     await rows[id].save(); 
 }
 
