@@ -18,16 +18,21 @@ async function connect() {
 }
 
 // Fetches all rows from the spreadsheet
-async function fetch() {
-    await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
-    const rows = await sheet.getRows();
+async function fetchJSON() {
+    const rows = await fetchRaw()
     const result = rows.map(element => {
         let obj = {}
         obj[element.Task] = element.Done
         return obj
     });
     return result
+}
+
+async function fetchRaw() {
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    return rows
 }
 
 // Deletes a row from the spreadsheet
@@ -58,7 +63,8 @@ async function edit(id, todoName, isDone) {
 
 module.exports = {
     connect: connect,
-    fetch: fetch,
+    fetchRaw: fetchRaw,
+    fetchJSON: fetchJSON,
     remove: remove,
     add: add,
     edit: edit,

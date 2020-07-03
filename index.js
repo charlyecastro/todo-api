@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 
 // Connect to spreadsheet
-    spreadsheet.connect()
+spreadsheet.connect()
 
 // Base route sends Hello World
 app.get('/', function (req, res) {
@@ -27,7 +27,7 @@ app.get('/', function (req, res) {
 // Returns all key value pairs
 app.get('/all', async function (req, res) {
     try {
-        let rows = await spreadsheet.fetch();
+        let rows = await spreadsheet.fetchJSON();
         res.json(rows)
     } catch (err) {
         console.log(err)
@@ -79,16 +79,18 @@ app.delete('/data/:key', async function (req, res) {
 })
 
 // Return index of existing key value pair otherwise return -1
-async function containsKey(key){
-    let rows = await spreadsheet.fetch();
-    let index = -1;
-    let filtered = rows.filter(row => {
-        index++;
-        return row[key] !== undefined
-    })
-    return filtered.length > 0 ? index : -1
+async function containsKey(key) {
+    let rows = await spreadsheet.fetchRaw();
+    for (let i = 0; i < rows.length; i++) {
+        let row = rows[i];
+        let rowKey = row.Task.toLowerCase()
+        if (rowKey == key.toLowerCase()) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 app.listen(process.env.PORT, () => {
     console.log("Server is running on port " + process.env.PORT);
-})
+}) 
