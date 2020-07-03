@@ -2,14 +2,14 @@ require('dotenv').config();
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 let doc;
 
-// connect to spreadsheet
+// Connect to spreadsheet
 async function connect() {
     doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID);
     await doc.useServiceAccountAuth(require('../client-secret.json'));
     console.log("connected to spreadsheet!")
 }
 
-// fetches all rows
+// Fetches all rows from the spreadsheet
 async function fetch() {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
@@ -22,25 +22,23 @@ async function fetch() {
     return result
 }
 
-// deletes a row
+// Deletes a row from the spreadsheet
 async function remove(id) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
     const rows = await sheet.getRows();
-    let info = await rows[id].delete();
-    console.log(info);
+    await rows[id].delete();
 }
 
-// add a new row
+// Add a new row to the spreadsheet
 async function add(todoName, isDone) {
     let todo = {"Task" : todoName, "Done" : isDone}
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 
-    let info = await sheet.addRow(todo);
-    console.log(info);
+    await sheet.addRow(todo);
 }
 
-// edit existing row
+// Edit existing row in the spreadsheet
 async function edit(id, todoName, isDone) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0]; 

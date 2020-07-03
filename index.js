@@ -3,18 +3,17 @@
 // Imports
 const express = require('express');
 const morgan = require("morgan");
-const CircularJSON = require('circular-json')
 const bodyParser = require('body-parser');
 const spreadsheet = require('./modules/spreadsheet-setup')
 require('dotenv').config();
 
 
-// instantiate app and use middlewares
+// Instantiate app and use middlewares
 const app = express();
 app.use(bodyParser.json());
 app.use(morgan("dev"));
 
-// connect to spreadsheet
+// Connect to spreadsheet
 spreadsheet.connect()
 
 //
@@ -22,7 +21,7 @@ app.get('/', function (req, res) {
     res.send('hello world')
 })
 
-// returns all todo items from spreadsheet
+// Returns all key value pairs
 app.get('/all', async function (req, res) {
     try {
         let rows = await spreadsheet.fetch();
@@ -32,10 +31,9 @@ app.get('/all', async function (req, res) {
         res.status(500);
         res.send("Something went wrong")
     }
-
 })
 
-// adds new todo item to spreadhsheet
+// Adds new kay value pair
 app.post('/data', async function (req, res) {
     try {
         let key = Object.keys(req.body)[0]
@@ -57,21 +55,27 @@ app.post('/data', async function (req, res) {
     }
 })
 
-// deletes todo item from spreadsheet
-app.delete('/data/:key', function (req, res) {
-    let key = req.params.key
+// Deletes existing key value pair 
+app.delete('/data/:key', async function (req, res) {
     try {
-        res.status(200);
-        res.send("OK")
-
+        let key = req.params.key
+        let index = await containsKey(key)
+        if (index !== -1) {
+            await spreadsheet.remove(index)
+            res.status(200);
+            res.send("OK");
+        } else {
+            res.status(404);
+            res.send("Key not found");
+        }
     } catch (err) {
         console.log(err)
-        res.status(404);
-        res.send("Key not found")
+        res.status(500);
+        res.send("Something went wrong");
     }
 })
 
-// return index of existing key value pair otherwise return -1
+// Return index of existing key value pair otherwise return -1
 async function containsKey(key){
     let rows = await spreadsheet.fetch();
     let index = -1;
