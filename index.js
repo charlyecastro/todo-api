@@ -1,4 +1,4 @@
-// "use strict";
+"use strict";
 
 // Imports
 const express = require('express');
@@ -7,7 +7,6 @@ const morgan = require("morgan");
 const bodyParser = require('body-parser');
 const spreadsheet = require('./modules/spreadsheet-setup')
 require('dotenv').config();
-
 
 // Instantiate app and use middlewares
 const app = express();
@@ -28,39 +27,64 @@ app.get('/', function (req, res) {
 app.get('/all', async function (req, res) {
     try {
         let rows = await spreadsheet.fetchJSON();
-        res.json(rows)
+        let response = {
+            result: 200,
+            data: rows
+        }
+        res.status(200);
+        res.json(response);
     } catch (err) {
         console.log(err)
         res.status(500);
-        res.send("Something went wrong")
+        res.json({
+            result: 500,
+            description: "Something went wrong"
+        });
     }
 })
 
 // Adds new kay value pair
 app.post('/data', async function (req, res) {
-    if (req.get('Content-Type') == 'application/json') {
+    if (req.get('Content-Type') != 'application/json') {
+        res.status(415);
+        res.json({
+            result: 415,
+            description: "Request header Content-Type must be application/json"
+        });
+    } else if (isEmpty(req.body)) {
+        res.status(400);
+        res.json({
+            result: 400,
+            description: "Request body can not be empty"
+        });
+    } else {
         try {
             let key = Object.keys(req.body)[0]
             let val = req.body[key]
             let index = await containsKey(key)
             if (index !== -1) {
                 await spreadsheet.edit(index, key, val)
-                console.log("edited existing key value pair")
+                res.status(200);
+                res.json({
+                    result: 200,
+                    description: "successfully updated key value pair"
+                });
             } else {
                 await spreadsheet.add(key, val);
-                console.log("added new key value pair")
+                res.status(201);
+                res.json({
+                    result: 201,
+                    description: "Successfully created new key-value pair"
+                })
             }
-            res.status(200);
-            res.send("OK")
         } catch (err) {
             console.log(err)
             res.status(500);
-            res.send("Something went wrong")
+            res.json({
+                result: 500,
+                description: "Something went wrong"
+            });
         }
-    } else {
-        console.log("Didn't set content type")
-        res.status(415);
-        res.send("Unsupported Media Type. Remember to set headers appropriately");
     }
 })
 
@@ -72,15 +96,24 @@ app.delete('/data/:key', async function (req, res) {
         if (index !== -1) {
             await spreadsheet.remove(index)
             res.status(200);
-            res.send("OK");
+            res.json({
+                result: 200,
+                description: "Successfully deleted key-value pair"
+            });
         } else {
             res.status(404);
-            res.send("Key not found");
+            res.json({
+                result: 404,
+                description: "Key not found"
+            });
         }
     } catch (err) {
         console.log(err)
         res.status(500);
-        res.send("Something went wrong");
+        res.json({
+            result: 500,
+            description: "Something went wrong"
+        });
     }
 })
 
@@ -89,12 +122,22 @@ async function containsKey(key) {
     let rows = await spreadsheet.fetchRaw();
     for (let i = 0; i < rows.length; i++) {
         let row = rows[i];
-        let rowKey = row.Task.toLowerCase()
+        let rowKey = row.Key.toLowerCase()
         if (rowKey == key.toLowerCase()) {
             return i;
         }
     }
     return -1;
+}
+
+// Takes in an object and check if it is empty
+function isEmpty(obj) {
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            return false;
+        }
+    }
+    return JSON.stringify(obj) === JSON.stringify({});
 }
 
 app.listen(process.env.PORT, () => {

@@ -17,17 +17,17 @@ async function connect() {
     }
 }
 
-// Fetches all rows from the spreadsheet
+// Appropriately formats the raw rows from the spreadsheet
 async function fetchJSON() {
     const rows = await fetchRaw()
-    const result = rows.map(element => {
-        let obj = {}
-        obj[element.Task] = element.Done
-        return obj
+    let result = {}
+    rows.forEach(element => {
+        result[element.Key] = element.Value
     });
     return result
 }
 
+// Fetches all raw rows from the spreadsheet
 async function fetchRaw() {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
@@ -36,29 +36,29 @@ async function fetchRaw() {
 }
 
 // Deletes a row from the spreadsheet
-async function remove(id) {
+async function remove(index) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
-    await rows[id].delete();
+    await rows[index].delete();
 }
 
 // Add a new row to the spreadsheet
-async function add(todoName, isDone) {
-    let todo = { "Task": todoName, "Done": isDone }
+async function add(key, val) {
+    let pair = { "Key": key, "Value": val }
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
-    await sheet.addRow(todo);
+    await sheet.addRow(pair);
 }
 
 // Edit existing row in the spreadsheet
-async function edit(id, todoName, isDone) {
+async function edit(index, key, val) {
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
-    rows[id].Task = todoName
-    rows[id].Done = isDone
-    await rows[id].save();
+    rows[index].Key = key
+    rows[index].Value = val
+    await rows[index].save();
 }
 
 module.exports = {
