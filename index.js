@@ -59,7 +59,7 @@ app.post('/data', async function (req, res) {
         });
     } else {
         try {
-            let key = Object.keys(req.body)[0]
+            let key = Object.keys(req.body)[0].trim()
             let val = req.body[key]
             let index = await containsKey(key)
             if (index !== -1) {
@@ -91,7 +91,7 @@ app.post('/data', async function (req, res) {
 // Deletes existing key value pair 
 app.delete('/data/:key', async function (req, res) {
     try {
-        let key = req.params.key
+        let key = req.params.key.trim()
         let index = await containsKey(key)
         if (index !== -1) {
             await spreadsheet.remove(index)
