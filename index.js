@@ -59,8 +59,9 @@ app.post('/data', async function (req, res) {
         });
     } else {
         try {
-            let key = Object.keys(req.body)[0].trim()
+            let key = Object.keys(req.body)[0]
             let val = req.body[key]
+            key = key.trim()
             let index = await containsKey(key)
             if (index !== -1) {
                 await spreadsheet.edit(index, key, val)
